@@ -66,7 +66,7 @@ class KeypicPlugin extends Gdn_Plugin {
    public function OnDisable() {
    }
 
-	public function SettingsController_Keypic_Create($Sender, $Args) {
+	public function SettingsController_Keypic_Create($Sender) {
       $Sender->Permission('Garden.Settings.Manage');
       if ($Sender->Form->IsPostBack()) {
          $Settings = array(
@@ -84,17 +84,19 @@ class KeypicPlugin extends Gdn_Plugin {
          $Sender->InformMessage(T("Your settings have been saved."));
 
       } else {
-         $Sender->Form->SetFormValue('FormID', C('Plugins.Keypic.FormID'));
+	  		
+			$Sender->Form->SetValue('FormID', C('Plugins.Keypic.FormID'));
+			
+			 // Signin
+			 $Sender->Form->SetValue('SigninEnabled', C('Plugins.Keypic.SigninEnabled'));
+			 $Sender->Form->SetValue('SigninWidthHeight', C('Plugins.Keypic.SigninWidthHeight'));
+			 $Sender->Form->SetValue('SigninRequestType', C('Plugins.Keypic.SigninRequestType'));
+			 
+			 // Signup
+			 $Sender->Form->SetValue('SignupEnabled', C('Plugins.Keypic.SignupEnabled'));
+			 $Sender->Form->SetValue('SignupWidthHeight', C('Plugins.Keypic.SignupWidthHeight'));
+			 $Sender->Form->SetValue('SignupRequestType', C('Plugins.Keypic.SignupRequestType'));
 
-		 // Signin
-		 $Sender->Form->SetFormValue('SigninEnabled', C('Plugins.Keypic.SigninEnabled'));
-		 $Sender->Form->SetFormValue('SigninWidthHeight', C('Plugins.Keypic.SigninWidthHeight'));
-		 $Sender->Form->SetFormValue('SigninRequestType', C('Plugins.Keypic.SigninRequestType'));
-		 
-		 // Signup
-		 $Sender->Form->SetFormValue('SignupEnabled', C('Plugins.Keypic.SignupEnabled'));
-		 $Sender->Form->SetFormValue('SignupWidthHeight', C('Plugins.Keypic.SignupWidthHeight'));
-		 $Sender->Form->SetFormValue('SignupRequestType', C('Plugins.Keypic.SignupRequestType'));
       }
 
       $Sender->AddSideMenu();
@@ -117,15 +119,36 @@ class KeypicPlugin extends Gdn_Plugin {
 		 $Sender->SetData('RequestType', array(
 			'getScript' => 'getScript'
 		 ));
-      $Sender->Render('Settings', '', 'plugins/Keypic');
+      $Sender->Render('settings', '', 'plugins/Keypic');
    }
    
    
    public function EntryController_SignIn_Handler($Sender, $Args) {
 		if (C('Plugins.Keypic.SigninEnabled'))
 		{
+			if ($Sender->Form->IsPostBack())
+			{/*
+				$Token = isset($_POST['Token']) ? $_POST['Token'] : '';
+				$spam = Keypic::isSpam($Token, null, $Sender->Form->GetFormValue('Email'), $ClientMessage = '', $ClientFingerprint = '');
+
+				if(!is_numeric($spam) || $spam > Keypic::getSpamPercentage())
+				{
+					if(is_numeric($spam))
+					{
+						$error = sprintf('This request has %s&#37; of spam', $spam);
+					}
+					else
+					{
+						$error = 'We are sorry, your Keypic token is not valid';
+					}
+					
+					$Sender->Form->AddError('<strong>SPAM</strong>: ' . $error);
+				}*/
+			}
+
 			$Token = isset($_POST['Token']) ? $_POST['Token'] : '';
-			$Sender->Form->AddHidden('Token', Keypic::getToken($Token));		
+			$Sender->Form->AddHidden('Token', Keypic::getToken($Token));
+			
 			$Sender->Head->AddString(Keypic::getIt(C('Plugins.Keypic.SigninRequestType'), C('Plugins.Keypic.SigninWidthHeight')));
 		}
    }
@@ -133,6 +156,26 @@ class KeypicPlugin extends Gdn_Plugin {
     public function EntryController_Register_Handler($Sender, $Args) {
 		if (C('Plugins.Keypic.SignupEnabled'))
 		{
+			if ($Sender->Form->IsPostBack())
+			{
+				$Token = isset($_POST['Token']) ? $_POST['Token'] : '';
+				$spam = Keypic::isSpam($Token, null, $Sender->Form->GetFormValue('Email'), $ClientMessage = '', $ClientFingerprint = '');
+
+				if(!is_numeric($spam) || $spam > Keypic::getSpamPercentage())
+				{
+					if(is_numeric($spam))
+					{
+						$error = sprintf('This request has %s&#37; of spam', $spam);
+					}
+					else
+					{
+						$error = 'We are sorry, your Keypic token is not valid';
+					}
+					
+					$Sender->Form->AddError('<strong>SPAM</strong>: ' . $error);
+				}
+			}
+			
 			$Token = isset($_POST['Token']) ? $_POST['Token'] : '';
 			$Sender->Form->AddHidden('Token', Keypic::getToken($Token));		
 			$Sender->Head->AddString(Keypic::getIt(C('Plugins.Keypic.SignupRequestType'), C('Plugins.Keypic.SignupWidthHeight')));
