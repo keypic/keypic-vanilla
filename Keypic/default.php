@@ -70,7 +70,6 @@ class KeypicPlugin extends Gdn_Plugin {
       $Sender->Permission('Garden.Settings.Manage');
       if ($Sender->Form->IsPostBack()) {
          $Settings = array(
-             'Plugins.Keypic.FormID' => $Sender->Form->GetFormValue('FormID'),
 			 'Plugins.Keypic.SigninEnabled' => $Sender->Form->GetFormValue('SigninEnabled'),
 			 'Plugins.Keypic.SigninWidthHeight' => $Sender->Form->GetFormValue('SigninWidthHeight'),
 			 'Plugins.Keypic.SigninRequestType' => $Sender->Form->GetFormValue('SigninRequestType'),
@@ -79,6 +78,16 @@ class KeypicPlugin extends Gdn_Plugin {
 			 'Plugins.Keypic.SignupWidthHeight' => $Sender->Form->GetFormValue('SignupWidthHeight'),
 			 'Plugins.Keypic.SignupRequestType' => $Sender->Form->GetFormValue('SignupRequestType')
 		 );
+
+		 if (strcmp(Keypic::checkFormID($Sender->Form->GetFormValue('FormID'))["status"], "response") == 0)
+		 {
+			$Settings = array_merge($Settings, array('Plugins.Keypic.FormID' => $Sender->Form->GetFormValue('FormID')));
+		 }
+		 else
+			$Sender->SetData('FormIDInvalid', 'trjbsdfjsbfdfbdsjue');
+		
+		 if (strlen($Sender->Form->GetFormValue('FormID')) == 0)
+			SaveToConfig(array('Plugins.Keypic.FormID' => ""));
 
          SaveToConfig($Settings);
          $Sender->InformMessage(T("Your settings have been saved."));
@@ -127,7 +136,7 @@ class KeypicPlugin extends Gdn_Plugin {
 		if (C('Plugins.Keypic.SigninEnabled'))
 		{
 			if ($Sender->Form->IsPostBack())
-			{/*
+			{
 				$Token = isset($_POST['Token']) ? $_POST['Token'] : '';
 				$spam = Keypic::isSpam($Token, null, $Sender->Form->GetFormValue('Email'), $ClientMessage = '', $ClientFingerprint = '');
 
@@ -143,7 +152,7 @@ class KeypicPlugin extends Gdn_Plugin {
 					}
 					
 					$Sender->Form->AddError('<strong>SPAM</strong>: ' . $error);
-				}*/
+				}
 			}
 
 			$Token = isset($_POST['Token']) ? $_POST['Token'] : '';

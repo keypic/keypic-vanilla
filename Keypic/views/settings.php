@@ -56,10 +56,15 @@ echo $this->Form->Errors();
 	</ol>
 	
 	<div class="Errors">
+		<?php if ($this->Data('FormID') == '' || $this->Data('FormIDInvalid')){ ?>
+		<ul>
 		<?php if ($this->Data('FormID') == ''){ ?>
-			<ul>
-				<li>Your FormID is empty, This plugin does not work without FormID, please <a href="http://keypic.com/?action=register" target="_blank">Get your FormID</a>.</li>
-			</ul>
+			<li>Your FormID is empty, This plugin does not work without FormID, please <a href="http://keypic.com/?action=register" target="_blank">Get your FormID</a>.</li>		
+		<?php } ?>
+		<?php if ($this->Data('FormIDInvalid')) { ?>
+			<li>The FormID you have entered is invalid</li>
+		<?php } ?>
+		</ul>
 		<?php } ?>
 	</div>
 </div>
