@@ -140,5 +140,65 @@ echo $this->Form->Errors();
       <?php echo $this->Form->Button('Save', array('class' => 'Button SliceSubmit')); ?>
    </div>
 </div>
+
+
+
+<div class="Configuration">
+   <div class="ConfigurationForm">	  
+	  <h2>Create new discussion Form Settings</h2>
+	  <ul>
+		<li>
+			<?php
+               echo $this->Form->Label('Enabled', 'PostEnabled');
+               echo $this->Form->CheckBox('PostEnabled');
+            ?>
+		</li>
+		<li>
+			<?php
+               echo $this->Form->Label('Width Height', 'PostWidthHeight');
+			   echo $this->Form->DropDown('PostWidthHeight', $this->Data('WidthHeight'));
+			 ?>
+		</li>
+		<li>
+			<?php
+               echo $this->Form->Label('RequestType', 'PostRequestType');
+			   echo $this->Form->DropDown('PostRequestType', $this->Data('RequestType'));
+			 ?>
+		</li>
+	  </ul>
+	  
+      <?php echo $this->Form->Button('Save', array('class' => 'Button SliceSubmit')); ?>
+   </div>
+</div>
+
+
+
+<div class="Configuration">
+   <div class="ConfigurationForm">	  
+	  <h2>Create new comment Form Settings</h2>
+	  <ul>
+		<li>
+			<?php
+               echo $this->Form->Label('Enabled', 'CommentEnabled');
+               echo $this->Form->CheckBox('CommentEnabled');
+            ?>
+		</li>
+		<li>
+			<?php
+               echo $this->Form->Label('Width Height', 'CommentWidthHeight');
+			   echo $this->Form->DropDown('CommentWidthHeight', $this->Data('WidthHeight'));
+			 ?>
+		</li>
+		<li>
+			<?php
+               echo $this->Form->Label('RequestType', 'CommentRequestType');
+			   echo $this->Form->DropDown('CommentRequestType', $this->Data('RequestType'));
+			 ?>
+		</li>
+	  </ul>
+	  
+      <?php echo $this->Form->Button('Save', array('class' => 'Button SliceSubmit')); ?>
+   </div>
+</div>
 <?php 
    echo $this->Form->Close(); ?>
