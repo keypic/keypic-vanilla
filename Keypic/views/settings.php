@@ -71,6 +71,33 @@ echo $this->Form->Errors();
 
 <div class="Configuration">
 	<div class="ConfigurationForm">
+			<?php if ($this->Data('user') == false){ ?>
+			<p>User not found!</p>
+			<?php } else if($this->Data('user') != 'fs') {?>
+				<?php echo (int)$this->Data('user')['KeypicSpam']; ?> % Spam.
+				<input type="hidden" name="ReportSpam" value="TRUE"><input type="hidden" name="Token" value="<?php echo $this->Data('user')['KeypicToken']; ?>">
+				<input type="hidden" name="UID" value="<?php echo $this->Data('user')['UserID']; ?>">
+				<?php echo $this->Form->Button('Report Spam and Delete user', array('class' => 'Button SliceSubmit')); ?>
+			<?php } ?>
+		  <h2>View Spam Status of user</h2>
+		  <ul>
+			 <li>
+				<?php
+				   echo $this->Form->Label('Email', 'email');
+				   echo $this->Form->TextBox('email');
+				?>
+				<span>
+				Enter Email in textbox.
+				</span>
+			 </li>
+		  </ul>
+		   <?php echo $this->Form->Button('View Spam Status', array('class' => 'Button SliceSubmit')); ?>
+	 </div>
+</div>
+
+
+<div class="Configuration">
+	<div class="ConfigurationForm">
 		  <ul>
 			 <li>
 				<?php

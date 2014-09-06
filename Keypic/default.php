@@ -44,6 +44,24 @@ class KeypicPlugin extends Gdn_Plugin {
       if ($Error)
          throw new Gdn_UserException($Error, 400);
 		
+	   Gdn::Structure()->Table('User')
+         ->Column('KeypicToken', 'varchar(255)', TRUE)
+		 ->Column('KeypicTS', 'varchar(64)', TRUE)
+		 ->Column('KeypicSpam', 'varchar(64)', TRUE)
+         ->Set(FALSE, FALSE);
+		 
+	  Gdn::Structure()->Table('Discussion')
+         ->Column('KeypicToken', 'varchar(255)', TRUE)
+		 ->Column('KeypicTS', 'varchar(64)', TRUE)
+		 ->Column('KeypicSpam', 'varchar(64)', TRUE)
+         ->Set(FALSE, FALSE);
+		 
+	 Gdn::Structure()->Table('Comment')
+         ->Column('KeypicToken', 'varchar(255)', TRUE)
+		 ->Column('KeypicTS', 'varchar(64)', TRUE)
+		 ->Column('KeypicSpam', 'varchar(64)', TRUE)
+         ->Set(FALSE, FALSE);
+		 
 	   $this->defaultSettings();
    }
    
@@ -68,41 +86,62 @@ class KeypicPlugin extends Gdn_Plugin {
  
    // Run on disable
    public function OnDisable() {
-   }
+		Gdn::Structure()->Table('User')
+         ->DropColumn('KeypicToken');
+		 Gdn::Structure()->Table('User')->DropColumn('KeypicTS');
+		 Gdn::Structure()->Table('User')->DropColumn('KeypicSpam');   
+	}
   
 	public function SettingsController_Keypic_Create($Sender) {
       $Sender->Permission('Garden.Settings.Manage');
+	  $Sender->SetData('user', 'fs');
+	  
       if ($Sender->Form->IsPostBack()) {
-         $Settings = array(
-			 'Plugins.Keypic.SigninEnabled' => $Sender->Form->GetFormValue('SigninEnabled'),
-			 'Plugins.Keypic.SigninWidthHeight' => $Sender->Form->GetFormValue('SigninWidthHeight'),
-			 'Plugins.Keypic.SigninRequestType' => $Sender->Form->GetFormValue('SigninRequestType'),
-			 
-			 'Plugins.Keypic.SignupEnabled' => $Sender->Form->GetFormValue('SignupEnabled'),
-			 'Plugins.Keypic.SignupWidthHeight' => $Sender->Form->GetFormValue('SignupWidthHeight'),
-			 'Plugins.Keypic.SignupRequestType' => $Sender->Form->GetFormValue('SignupRequestType'),
-			 
-			 'Plugins.Keypic.PostEnabled' => $Sender->Form->GetFormValue('PostEnabled'),
-			 'Plugins.Keypic.PostWidthHeight' => $Sender->Form->GetFormValue('PostWidthHeight'),
-			 'Plugins.Keypic.PostRequestType' => $Sender->Form->GetFormValue('PostRequestType'),
-			 
-			 'Plugins.Keypic.CommentEnabled' => $Sender->Form->GetFormValue('CommentEnabled'),
-			 'Plugins.Keypic.CommentWidthHeight' => $Sender->Form->GetFormValue('CommentWidthHeight'),
-			 'Plugins.Keypic.CommentRequestType' => $Sender->Form->GetFormValue('CommentRequestType')
-		 );
-
-		 if (strcmp(Keypic::checkFormID($Sender->Form->GetFormValue('FormID'))["status"], "response") == 0)
-		 {
-			$Settings = array_merge($Settings, array('Plugins.Keypic.FormID' => $Sender->Form->GetFormValue('FormID')));
-		 }
-		 else
-			$Sender->SetData('FormIDInvalid', 'trjbsdfjsbfdfbdsjue');
 		
-		 if (strlen($Sender->Form->GetFormValue('FormID')) == 0)
-			SaveToConfig(array('Plugins.Keypic.FormID' => ""));
+		if ($Sender->Form->GetFormValue('ReportSpam') != '' && $Sender->Form->GetFormValue('Token') != '' && $Sender->Form->GetFormValue('UID') != '')
+		{
+				Keypic::reportSpam($Sender->Form->GetFormValue('Token'));
+				header('Location: '.Url('user/delete/'.$Sender->Form->GetFormValue('UID')));exit;
+		}
+		
+		if ($Sender->Form->GetFormValue('email') != '')
+		{
+			$data = Gdn::SQL()->GetWhere('User', array('Email' => trim($Sender->Form->GetFormValue('email'))))->FirstRow(DATASET_TYPE_ARRAY);
+			$Sender->SetData('user', $data);
+			$Sender->Form->SetFormValue('email', '');
+		}
+		else {
+			 $Settings = array(
+				 'Plugins.Keypic.SigninEnabled' => $Sender->Form->GetFormValue('SigninEnabled'),
+				 'Plugins.Keypic.SigninWidthHeight' => $Sender->Form->GetFormValue('SigninWidthHeight'),
+				 'Plugins.Keypic.SigninRequestType' => $Sender->Form->GetFormValue('SigninRequestType'),
+				 
+				 'Plugins.Keypic.SignupEnabled' => $Sender->Form->GetFormValue('SignupEnabled'),
+				 'Plugins.Keypic.SignupWidthHeight' => $Sender->Form->GetFormValue('SignupWidthHeight'),
+				 'Plugins.Keypic.SignupRequestType' => $Sender->Form->GetFormValue('SignupRequestType'),
+				 
+				 'Plugins.Keypic.PostEnabled' => $Sender->Form->GetFormValue('PostEnabled'),
+				 'Plugins.Keypic.PostWidthHeight' => $Sender->Form->GetFormValue('PostWidthHeight'),
+				 'Plugins.Keypic.PostRequestType' => $Sender->Form->GetFormValue('PostRequestType'),
+				 
+				 'Plugins.Keypic.CommentEnabled' => $Sender->Form->GetFormValue('CommentEnabled'),
+				 'Plugins.Keypic.CommentWidthHeight' => $Sender->Form->GetFormValue('CommentWidthHeight'),
+				 'Plugins.Keypic.CommentRequestType' => $Sender->Form->GetFormValue('CommentRequestType')
+			 );
 
-         SaveToConfig($Settings);
-         $Sender->InformMessage(T("Your settings have been saved."));
+			 if (strcmp(Keypic::checkFormID($Sender->Form->GetFormValue('FormID'))["status"], "response") == 0)
+			 {
+				$Settings = array_merge($Settings, array('Plugins.Keypic.FormID' => $Sender->Form->GetFormValue('FormID')));
+			 }
+			 else
+				$Sender->SetData('FormIDInvalid', 'trjbsdfjsbfdfbdsjue');
+			
+			 if (strlen($Sender->Form->GetFormValue('FormID')) == 0)
+				SaveToConfig(array('Plugins.Keypic.FormID' => ""));
+
+			 SaveToConfig($Settings);
+			 $Sender->InformMessage(T("Your settings have been saved."));
+		}
 
       } else {
 	  		
@@ -154,7 +193,7 @@ class KeypicPlugin extends Gdn_Plugin {
    
    
    public function EntryController_SignIn_Handler($Sender, $Args) {
-		if (C('Plugins.Keypic.SigninEnabled'))
+		if (C('Plugins.Keypic.SigninEnabled') && !isset($_GET['DeliveryType']) && !isset($_POST['DeliveryType']))
 		{
 			if ($Sender->Form->IsPostBack())
 			{
@@ -190,7 +229,7 @@ class KeypicPlugin extends Gdn_Plugin {
 			if ($Sender->Form->IsPostBack())
 			{
 				$Token = isset($_POST['Token']) ? $_POST['Token'] : '';
-				$spam = Keypic::isSpam($Token, null, $Sender->Form->GetFormValue('Email'), $ClientMessage = '', $ClientFingerprint = '');
+				$spam = Keypic::isSpam($Token, $Sender->Form->GetFormValue('Email'), $Sender->Form->GetFormValue('Name'), $ClientMessage = '', $ClientFingerprint = '');
 
 				if(!is_numeric($spam) || $spam > Keypic::getSpamPercentage())
 				{
@@ -215,6 +254,23 @@ class KeypicPlugin extends Gdn_Plugin {
 		}
    }
    
+   public function UserModel_AfterInsertUser_Handler($Sender, $Args) {
+		$Token = isset($_POST['Token']) ? $_POST['Token'] : '';
+		$spam = Keypic::isSpam($Token, $_POST['Email'], $_POST['Name'], $ClientMessage = '', $ClientFingerprint = '');
+
+		Gdn::SQL()
+		->Update('User')
+		->Set(
+            array(
+                'KeypicToken' => $Token,
+				'KeypicTS' => time(),
+				'KeypicSpam' => $spam
+            ))
+        ->Where (
+               'Email', $_POST['Email']
+            )->Put(); 
+   }
+   
     public function PostController_BeforeDiscussionRender_Handler($Sender, $Args) {
 		if (C('Plugins.Keypic.PostEnabled'))
 		{
@@ -229,7 +285,7 @@ class KeypicPlugin extends Gdn_Plugin {
 		if (C('Plugins.Keypic.PostEnabled'))
 		{
 			$Token = isset($_POST['Token']) ? $_POST['Token'] : '';
-			$spam = Keypic::isSpam($Token, null, Gdn::Session()->User->Name, $ClientMessage = '', $ClientFingerprint = '');
+			$spam = Keypic::isSpam($Token, Gdn::Session()->User->Email, Gdn::Session()->User->Name, $_POST['Body'], $ClientFingerprint = '');
 
 			if(!is_numeric($spam) || $spam > Keypic::getSpamPercentage())
 			{
@@ -248,6 +304,8 @@ class KeypicPlugin extends Gdn_Plugin {
 	}
 	
 	public function DiscussionController_BeforeDiscussionRender_Handler($Sender) {
+		$Session = Gdn::Session();
+
 		if (C('Plugins.Keypic.CommentEnabled'))
 		{
 			$Sender->Form->AddHidden('Token', Keypic::getToken($Token));
@@ -255,13 +313,40 @@ class KeypicPlugin extends Gdn_Plugin {
 			$mod = new KeypicCommentModule($Sender);
 			$Sender->AddModule($mod);
 		}
+		
+		// Reporting
+		if (isset($_GET['reportSpam']) && isset($_GET['d']) && is_object($Session->User) && $Session->User->Admin == '1')
+		{
+			$data = Gdn::SQL()->GetWhere('Discussion', array('DiscussionID' => trim($_GET['d'])))->FirstRow(DATASET_TYPE_ARRAY);
+			if (Keypic::reportSpam($data['KeypicToken']) != 'error')		
+				$Sender->InformMessage(T("The discussion has been reported as spam to Keypic."));
+		}
 	}
 	
+	
+	 public function DiscussionModel_AfterSaveDiscussion_Handler($Sender, $Args) {
+		$Token = isset($_POST['Token']) ? $_POST['Token'] : '';
+		$spam = Keypic::isSpam($Token, null, $_POST['Email'], $ClientMessage = '', $ClientFingerprint = '');
+		
+		Gdn::SQL()
+		->Update('Discussion')
+		->Set(
+            array(
+                'KeypicToken' => $Token,
+				'KeypicTS' => time(),
+				'KeypicSpam' => $spam
+            ))
+        ->Where (
+               'DiscussionID', $Sender->EventArguments['DiscussionID']
+            )->Put();
+   }
+   
+   
 	 public function CommentModel_BeforeSaveComment_Handler($Sender) {
 		if (C('Plugins.Keypic.CommentEnabled'))
 		{
 			$Token = isset($_POST['Token']) ? $_POST['Token'] : '';
-			$spam = Keypic::isSpam($Token, null, Gdn::Session()->User->Name, $ClientMessage = '', $ClientFingerprint = '');
+			$spam = Keypic::isSpam($Token, Gdn::Session()->User->Name, Gdn::Session()->User->Email, $ClientMessage = '', $ClientFingerprint = '');
 
 			if(!is_numeric($spam) || $spam > Keypic::getSpamPercentage())
 			{
@@ -275,6 +360,21 @@ class KeypicPlugin extends Gdn_Plugin {
 				}
 				
 				$Sender->Validation->AddValidationResult('Token', '<strong>SPAM</strong>: ' . $error);
+			}
+		}
+	 }
+	 
+	 
+	 public function DiscussionController_CommentOptions_Handler($Sender){
+		$Session = Gdn::Session();
+
+		if (is_object($Session->User) && $Session->User->Admin == '1')
+		{
+			if ($Sender->EventArguments['Type'] == 'Discussion') {
+				$Sender->Options .= '<span>'.Anchor('Report as Spam to Keypic', $Sender->Request->path().'&reportSpam=true&d='.$Sender->Discussion->DiscussionID).'</span>';
+			}
+			else {
+			
 			}
 		}
 	 }
