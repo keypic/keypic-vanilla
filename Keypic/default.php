@@ -405,24 +405,41 @@ class KeypicPlugin extends Gdn_Plugin {
 	 
 	 public function DiscussionController_CommentInfo_Handler($Sender){
 	 	$Session = Gdn::Session();
-		
+
 		 if (is_object($Session->User) && $Session->User->Admin == '1')
 		 {
-			echo '<span>Keypic Spam status : ';
-			echo ($Sender->EventArguments['Comment']->KeypicSpam == '')?0:$Sender->EventArguments['Comment']->KeypicSpam;
-			echo '%</span>';
+			if ($Sender->EventArguments['Type'] == 'Discussion')
+			{
+				echo '<span>Keypic Spam status : ';
+				echo ($Sender->Discussion->KeypicSpam == '')?0:$Sender->Discussion->KeypicSpam;
+				echo '%</span>';
+				
+			}
+			else{
+				echo '<span>Keypic Spam status : ';
+				echo ($Sender->EventArguments['Comment']->KeypicSpam == '')?0:$Sender->EventArguments['Comment']->KeypicSpam;
+				echo '%</span>';
+			}
 		}
 	 }
 	 
 	 // For 2.1
 	  public function DiscussionController_DiscussionInfo_Handler($Sender){
 		 $Session = Gdn::Session();
-		
+
 		 if (is_object($Session->User) && $Session->User->Admin == '1')
 		 {
-			echo '<span>Keypic Spam status : ';
-			echo ($Sender->EventArguments['Comment']->KeypicSpam == '')?0:$Sender->EventArguments['Comment']->KeypicSpam;
-			echo '%</span>';
+			if ($Sender->EventArguments['Type'] == 'Discussion')
+			{
+				echo '<span>Keypic Spam status : ';
+				echo ($Sender->Discussion->KeypicSpam == '')?0:$Sender->Discussion->KeypicSpam;
+				echo '%</span>';
+			}
+			else {
+				echo '<span>Keypic Spam status : ';
+				echo ($Sender->EventArguments['Comment']->KeypicSpam == '')?0:$Sender->EventArguments['Comment']->KeypicSpam;
+				echo '%</span>';
+			}
 		 }
 	  }
 	 
