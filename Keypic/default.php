@@ -414,6 +414,18 @@ class KeypicPlugin extends Gdn_Plugin {
 		}
 	 }
 	 
+	 // For 2.1
+	  public function DiscussionController_DiscussionInfo_Handler($Sender){
+		 $Session = Gdn::Session();
+		
+		 if (is_object($Session->User) && $Session->User->Admin == '1')
+		 {
+			echo '<span>Keypic Spam status : ';
+			echo ($Sender->EventArguments['Comment']->KeypicSpam == '')?0:$Sender->EventArguments['Comment']->KeypicSpam;
+			echo '%</span>';
+		 }
+	  }
+	 
 	 // For 2.0
 	 public function DiscussionController_CommentOptions_Handler($Sender){
 		$Session = Gdn::Session();
