@@ -12,7 +12,7 @@ Contact Vanilla Forums Inc. at support [at] vanillaforums [dot] com
 $PluginInfo['Keypic'] = array(
 	'Name' => 'Keypic',
    'Description' => 'For many people, Keypic is quite possibly the best way in the world to protect your forum from comment and trackback spam. It keeps your site protected from spam even while you sleep.',
-   'Version' => '0.0.0.2',
+   'Version' => '1.0',
    'RequiredApplications' => array('Vanilla' => '>=2'),
    'RequiredTheme' => FALSE,
    'RequiredPlugins' => FALSE,
