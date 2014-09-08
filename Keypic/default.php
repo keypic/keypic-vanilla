@@ -202,7 +202,7 @@ class KeypicPlugin extends Gdn_Plugin {
    
    
    public function EntryController_SignIn_Handler($Sender, $Args) {
-		if (C('Plugins.Keypic.SigninEnabled') && !isset($_GET['DeliveryType']) && !isset($_POST['DeliveryType']))
+		if (strlen(C('Plugins.Keypic.FormID')) > 0 && C('Plugins.Keypic.SigninEnabled') && !isset($_GET['DeliveryType']) && !isset($_POST['DeliveryType']))
 		{
 			if ($Sender->Form->IsPostBack())
 			{
@@ -230,10 +230,15 @@ class KeypicPlugin extends Gdn_Plugin {
 			$mod = new KeypicSigninModule($Sender);
 			$Sender->AddModule($mod);
 		}
+		
+		if (!$Sender->Form->IsPostBack() && strlen(C('Plugins.Keypic.FormID')) == 0)
+		{
+			$Sender->Form->AddError('A formid is required for Keypic plugin to work.');
+		}
    }
    
     public function EntryController_Register_Handler($Sender, $Args) {
-		if (C('Plugins.Keypic.SignupEnabled'))
+		if (strlen(C('Plugins.Keypic.FormID')) > 0 && C('Plugins.Keypic.SignupEnabled'))
 		{
 			if ($Sender->Form->IsPostBack())
 			{
@@ -261,9 +266,16 @@ class KeypicPlugin extends Gdn_Plugin {
 			$mod = new KeypicSignupModule($Sender);
 			$Sender->AddModule($mod);
 		}
+		
+		if (!$Sender->Form->IsPostBack() && strlen(C('Plugins.Keypic.FormID')) == 0)
+		{
+			$Sender->Form->AddError('A formid is required for Keypic plugin to work.');
+		}
    }
    
    public function UserModel_AfterInsertUser_Handler($Sender, $Args) {
+	if (strlen(C('Plugins.Keypic.FormID')) > 0 && C('Plugins.Keypic.SignupEnabled'))
+	{
 		$Token = isset($_POST['Token']) ? $_POST['Token'] : '';
 		$spam = Keypic::isSpam($Token, $_POST['Email'], $_POST['Name'], $ClientMessage = '', $ClientFingerprint = '');
 
@@ -278,10 +290,11 @@ class KeypicPlugin extends Gdn_Plugin {
         ->Where (
                'Email', $_POST['Email']
             )->Put(); 
+		}
    }
    
     public function PostController_BeforeDiscussionRender_Handler($Sender, $Args) {
-		if (C('Plugins.Keypic.PostEnabled'))
+		if (strlen(C('Plugins.Keypic.FormID')) > 0 && C('Plugins.Keypic.PostEnabled'))
 		{
 			$Token = isset($_POST['Token']) ? $_POST['Token'] : '';
 			$Sender->Form->AddHidden('Token', Keypic::getToken($Token));
@@ -289,10 +302,15 @@ class KeypicPlugin extends Gdn_Plugin {
 			$mod = new KeypicPostModule($Sender);
 			$Sender->AddModule($mod);
 		}
+		
+		if (!$Sender->Form->IsPostBack() && strlen(C('Plugins.Keypic.FormID')) == 0)
+		{
+			$Sender->Form->AddError('A formid is required for Keypic plugin to work.');
+		}
 	}
 	
 	 public function DiscussionModel_BeforeSaveDiscussion_Handler($Sender) {
-		if (C('Plugins.Keypic.PostEnabled'))
+		if (strlen(C('Plugins.Keypic.FormID')) > 0 && C('Plugins.Keypic.PostEnabled'))
 		{
 			$Token = isset($_POST['Token']) ? $_POST['Token'] : '';
 			$spam = Keypic::isSpam($Token, Gdn::Session()->User->Email, Gdn::Session()->User->Name, $_POST['Body'], $ClientFingerprint = '');
@@ -316,13 +334,18 @@ class KeypicPlugin extends Gdn_Plugin {
 	public function DiscussionController_BeforeDiscussionRender_Handler($Sender) {
 		$Session = Gdn::Session();
 
-		if (C('Plugins.Keypic.CommentEnabled'))
+		if (strlen(C('Plugins.Keypic.FormID')) > 0 && C('Plugins.Keypic.CommentEnabled'))
 		{
 			$Token = isset($_POST['Token']) ? $_POST['Token'] : '';
 			$Sender->Form->AddHidden('Token', Keypic::getToken($Token));
 
 			$mod = new KeypicCommentModule($Sender);
 			$Sender->AddModule($mod);
+		}
+		
+		if (!$Sender->Form->IsPostBack() && strlen(C('Plugins.Keypic.FormID')) == 0)
+		{
+			$Sender->Form->AddError('A formid is required for Keypic plugin to work.');
 		}
 		
 		// Reporting
@@ -344,25 +367,28 @@ class KeypicPlugin extends Gdn_Plugin {
 	
 	
 	 public function DiscussionModel_AfterSaveDiscussion_Handler($Sender, $Args) {
-		$Token = isset($_POST['Token']) ? $_POST['Token'] : '';
-		$spam = Keypic::isSpam($Token, null, $_POST['Email'], $_POST['Body'], $ClientFingerprint = '');
-		
-		Gdn::SQL()
-		->Update('Discussion')
-		->Set(
-            array(
-                'KeypicToken' => $Token,
-				'KeypicTS' => time(),
-				'KeypicSpam' => $spam
-            ))
-        ->Where (
-               'DiscussionID', $Sender->EventArguments['DiscussionID']
-            )->Put();
+		if (strlen(C('Plugins.Keypic.FormID')) > 0 && C('Plugins.Keypic.PostEnabled'))
+		{
+			$Token = isset($_POST['Token']) ? $_POST['Token'] : '';
+			$spam = Keypic::isSpam($Token, null, $_POST['Email'], $_POST['Body'], $ClientFingerprint = '');
+			
+			Gdn::SQL()
+			->Update('Discussion')
+			->Set(
+				array(
+					'KeypicToken' => $Token,
+					'KeypicTS' => time(),
+					'KeypicSpam' => $spam
+				))
+			->Where (
+				   'DiscussionID', $Sender->EventArguments['DiscussionID']
+				)->Put();
+		}
    }
    
    
 	 public function CommentModel_BeforeSaveComment_Handler($Sender) {
-		if (C('Plugins.Keypic.CommentEnabled'))
+		if (strlen(C('Plugins.Keypic.FormID')) > 0 && C('Plugins.Keypic.CommentEnabled'))
 		{
 			$Token = isset($_POST['Token']) ? $_POST['Token'] : '';
 			$spam = Keypic::isSpam($Token, Gdn::Session()->User->Name, Gdn::Session()->User->Email, $_POST['Body'], $ClientFingerprint = '');
@@ -384,7 +410,7 @@ class KeypicPlugin extends Gdn_Plugin {
 	 }
 	 
 	 public function PostController_AfterCommentSave_Handler($Sender) {
-		if (C('Plugins.Keypic.CommentEnabled'))
+		if (strlen(C('Plugins.Keypic.FormID')) > 0 && C('Plugins.Keypic.CommentEnabled'))
 		{
 			$Token = isset($_POST['Token']) ? $_POST['Token'] : '';
 			$spam = Keypic::isSpam($Token, Gdn::Session()->User->Name, Gdn::Session()->User->Email, $_POST['Body'], $ClientFingerprint = '');
