@@ -7,4 +7,7 @@ Keypic web site
 http://keypic.com
 
 Keypic Vanilla Live Demo
-http://vanilla.keypic.com
+http://vanillaforums.keypic.com/
+
+Vanilla forums web site
+http://vanillaforums.org/
