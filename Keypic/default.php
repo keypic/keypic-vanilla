@@ -69,7 +69,7 @@ class KeypicPlugin extends Gdn_Plugin {
    private function defaultSettings()
    {
 		$default_config = array(
-             'Plugins.Keypic.SigninEnabled' => true,
+             'Plugins.Keypic.SigninEnabled' => false,
 			 'Plugins.Keypic.SignupEnabled' => true,
 			 'Plugins.Keypic.PostEnabled' => true,
 			 'Plugins.Keypic.CommentEnabled' => true,
