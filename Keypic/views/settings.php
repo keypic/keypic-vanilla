@@ -206,10 +206,11 @@ echo $this->Form->Errors();
 	<div class="ConfigurationForm">
 			<?php if ($this->Data('user') == false){ ?>
 			<p>User not found!</p>
-			<?php } else if($this->Data('user') != 'fs') {?>
-				<?php echo (int)$this->Data('user')['KeypicSpam']; ?> % Spam.
-				<input type="hidden" name="ReportSpam" value="TRUE"><input type="hidden" name="Token" value="<?php echo $this->Data('user')['KeypicToken']; ?>">
-				<input type="hidden" name="UID" value="<?php echo $this->Data('user')['UserID']; ?>">
+			<?php } else if($this->Data('user') != 'fs') {
+			        $data = $this->Data('user'); ?>
+				<?php echo (int)$data['KeypicSpam']; ?> % Spam.
+				<input type="hidden" name="ReportSpam" value="TRUE"><input type="hidden" name="Token" value="<?php echo $data['KeypicToken']; ?>">
+				<input type="hidden" name="UID" value="<?php echo $data['UserID']; ?>">
 				<?php echo $this->Form->Button('Report Spam and Delete user', array('class' => 'Button SliceSubmit')); ?>
 			<?php } ?>
 		  <h2>View Spam Status of user</h2>
