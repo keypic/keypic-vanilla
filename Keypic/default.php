@@ -138,7 +138,8 @@ class KeypicPlugin extends Gdn_Plugin {
 				 'Plugins.Keypic.CommentRequestType' => $Sender->Form->GetFormValue('CommentRequestType')
 			 );
 
-			 if (strcmp(Keypic::checkFormID($Sender->Form->GetFormValue('FormID'))["status"], "response") == 0)
+			 $return_keypic_status = Keypic::checkFormID($Sender->Form->GetFormValue('FormID'));
+			 if (strcmp($return_keypic_status["status"], "response") == 0)
 			 {
 				$Settings = array_merge($Settings, array('Plugins.Keypic.FormID' => $Sender->Form->GetFormValue('FormID')));
 			 }
