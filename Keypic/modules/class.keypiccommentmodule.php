@@ -3,7 +3,7 @@
 class KeypicCommentModule extends Gdn_Module {
  
   public function AssetTarget() {
-    return 'Foot';
+    return 'Content';
   }
   public function ToString() {
 		echo Keypic::getIt(C('Plugins.Keypic.CommentRequestType'), C('Plugins.Keypic.CommentWidthHeight'));

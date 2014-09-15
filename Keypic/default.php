@@ -12,7 +12,7 @@ Contact Vanilla Forums Inc. at support [at] vanillaforums [dot] com
 $PluginInfo['Keypic'] = array(
 	'Name' => 'Keypic',
    'Description' => 'For many people, Keypic is quite possibly the best way in the world to protect your forum from comment and trackback spam. It keeps your site protected from spam even while you sleep.',
-   'Version' => '1.1',
+   'Version' => '1.2',
    'RequiredApplications' => array('Vanilla' => '>=2'),
    'RequiredTheme' => FALSE,
    'RequiredPlugins' => FALSE,
@@ -264,8 +264,8 @@ class KeypicPlugin extends Gdn_Plugin {
 			$Token = isset($_POST['Token']) ? $_POST['Token'] : '';
 			$Sender->Form->AddHidden('Token', Keypic::getToken($Token));
 
-			$mod = new KeypicSignupModule($Sender);
-			$Sender->AddModule($mod);
+			//$mod = new KeypicSignupModule($Sender);
+			//$Sender->AddModule($mod);
 		}
 		
 		if (!$Sender->Form->IsPostBack() && strlen(C('Plugins.Keypic.FormID')) == 0)
@@ -273,7 +273,15 @@ class KeypicPlugin extends Gdn_Plugin {
 			$Sender->Form->AddError('A formid is required for Keypic plugin to work.');
 		}
    }
-   
+
+    public function EntryController_RegisterBeforeTerms_Handler($Sender)
+    {
+        echo '<li>';
+        echo Keypic::getIt(C('Plugins.Keypic.SignupRequestType'), C('Plugins.Keypic.SignupWidthHeight'));
+        echo '</li>';
+    }
+
+
    public function UserModel_AfterInsertUser_Handler($Sender, $Args) {
 	if (strlen(C('Plugins.Keypic.FormID')) > 0 && C('Plugins.Keypic.SignupEnabled'))
 	{
